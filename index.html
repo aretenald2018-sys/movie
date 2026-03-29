@@ -31,12 +31,19 @@
   <div id="movie-calendar-content" class="movie-calendar-content"></div>
 </div>
 
-<script src="config.js"></script>
-<script src="data.js"></script>
-<script src="render-movie.js"></script>
-<script>
+<script type="module">
+  import { MONTHS } from './config.js';
+  import { TODAY, daysInMonth, getMovieData, saveMovieData } from './data.js';
+  import * as RenderMovie from './render-movie.js';
+  
+  // 전역에 함수 노출
+  window.changeMovieMonth = RenderMovie.changeMovieMonth;
+  window.renderMovie = RenderMovie.renderMovie;
+  window.startMovieCrawl = RenderMovie.startMovieCrawl;
+  window.toggleMovieTagFilter = RenderMovie.toggleMovieTagFilter;
+  
   // 초기화
-  renderMovie();
+  RenderMovie.renderMovie();
 </script>
 
 </body>
