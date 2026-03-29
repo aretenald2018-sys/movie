@@ -1,10 +1,12 @@
 {
+  "id": "/movie/",
   "name": "무코 영화 캘린더",
   "short_name": "영화 캘린더",
   "description": "muko.kr 영화 일정",
-  "start_url": "/movie/index.html",
+  "start_url": "/movie/",
+  "scope": "/movie/",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#0a0b0d",
   "theme_color": "#0a0b0d",
   "orientation": "portrait-primary",
   "icons": [
