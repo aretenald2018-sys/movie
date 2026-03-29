@@ -22,28 +22,20 @@
 <!-- 영화 탭 -->
 <div id="tab-movie" class="tab-panel active" style="display: block;">
   <div class="movie-tab-header">
-    <button class="month-nav-btn" onclick="changeMovieMonth(-1)">◀</button>
+    <button class="month-nav-btn" onclick="window.changeMovieMonth(-1)">◀</button>
     <span class="movie-tab-title" id="movie-label">2026년 3월</span>
-    <button class="month-nav-btn" onclick="changeMovieMonth(1)">▶</button>
-    <button class="movie-refresh-btn" id="movie-refresh-btn" onclick="startMovieCrawl()" title="muko.kr에서 최신 영화 데이터 자동 크롤링">🔄 새로고침</button>
+    <button class="month-nav-btn" onclick="window.changeMovieMonth(1)">▶</button>
+    <button class="movie-refresh-btn" id="movie-refresh-btn" onclick="window.startMovieCrawl()" title="muko.kr에서 최신 영화 데이터 자동 크롤링">🔄 새로고침</button>
   </div>
   <div id="movie-tag-filters" class="movie-tag-filters"></div>
   <div id="movie-calendar-content" class="movie-calendar-content"></div>
 </div>
 
 <script type="module">
-  import { MONTHS } from './config.js';
-  import { TODAY, daysInMonth, getMovieData, saveMovieData } from './data.js';
-  import * as RenderMovie from './render-movie.js';
-  
-  // 전역에 함수 노출
-  window.changeMovieMonth = RenderMovie.changeMovieMonth;
-  window.renderMovie = RenderMovie.renderMovie;
-  window.startMovieCrawl = RenderMovie.startMovieCrawl;
-  window.toggleMovieTagFilter = RenderMovie.toggleMovieTagFilter;
+  import { renderMovie } from './render-movie.js';
   
   // 초기화
-  RenderMovie.renderMovie();
+  window.renderMovie().catch(e => console.error('renderMovie error:', e));
 </script>
 
 </body>
