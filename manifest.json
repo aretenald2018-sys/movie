@@ -1,35 +1,56 @@
 {
+  "id": "/movie/index.html",
   "name": "무코 영화 캘린더 - muko.kr 영화 일정",
   "short_name": "영화 캘린더",
   "description": "muko.kr에서 수집한 영화 상영, 시사회, GV, 영화제 일정을 한눈에 확인하세요",
-  "start_url": ".",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
+  "theme_color": "#0a0b0d",
   "background_color": "#0a0b0d",
-  "theme_color": "#1a1a1a",
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "icon.svg",
-      "type": "image/svg+xml",
-      "sizes": "any",
+      "src": "icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any"
     },
     {
       "src": "icon.svg",
-      "type": "image/svg+xml",
       "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "maskable"
     }
   ],
   "categories": ["entertainment", "productivity"],
   "screenshots": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%230a0b0d' width='540' height='720'/><rect fill='%2313151a' x='0' y='0' width='540' height='60'/><text x='270' y='40' font-size='24' font-weight='bold' text-anchor='middle' fill='%23f59e0b' font-family='Arial'>🎬 영화 캘린더</text><rect fill='%2315181f' x='10' y='70' width='520' height='640' rx='10'/><text x='270' y='150' font-size='16' text-anchor='middle' fill='%23e2e4ea' font-family='Arial'>2026년 3월</text><text x='270' y='600' font-size='14' text-anchor='middle' fill='%235c6478' font-family='Arial'>오프라인에서도 영화 일정을 확인하세요!</text></svg>",
+      "src": "screenshot_narrow.png",
       "sizes": "540x720",
-      "type": "image/svg+xml",
-      "form_factor": "narrow"
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "영화 캘린더 모바일 화면"
+    },
+    {
+      "src": "screenshot_wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "영화 캘린더 데스크톱 화면"
     }
   ],
   "shortcuts": [
@@ -37,12 +58,12 @@
       "name": "현재 달 보기",
       "short_name": "현재 달",
       "description": "현재 월의 영화 일정 확인",
-      "url": ".",
+      "url": "./index.html",
       "icons": [
         {
-          "src": "icon.svg",
-          "sizes": "any",
-          "type": "image/svg+xml"
+          "src": "icon-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
         }
       ]
     }
