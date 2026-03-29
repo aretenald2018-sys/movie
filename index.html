@@ -42,6 +42,10 @@ const TAGS=[
 
 let y=2026, m=2, filters=new Set(), cache={};
 
+function daysInMonth(y,m){
+  return new Date(y,m+1,0).getDate();
+}
+
 async function getData(y,m){
   let k=y+"-"+String(m+1).padStart(2,"0");
   if(cache[k]) {
@@ -56,12 +60,16 @@ async function getData(y,m){
     if(!r.ok) throw new Error(`HTTP Error: ${r.status}`);
 
     cache[k]=await r.json();
-    console.log(`[데이터 성공] ${k} 데이터를 불러왔습니다.`, cache[k]);
+    console.log(`[데이터 성공] ${k} 데이터를 불러왔습니다. 이벤트 수:`, cache[k].events.length);
     return cache[k];
   }catch(e){
     console.error(`[데이터 실패] ${k} 데이터를 불러오지 못했습니다:`, e);
     return {events:[]};
   }
+}
+
+function countByTag(events, tagId) {
+  return events.filter(e => (e.tags || []).includes(tagId)).length;
 }
 
 async function changeMovieMonth(d){
@@ -82,10 +90,120 @@ async function render(){
     let d=await getData(y,m);
     let e=d.events||[];
 
-    console.log(`[이벤트 로드] 총 ${e.length}개 이벤트`);
+    let filteredEvents = e;
+    if(filters.size > 0) {
+      filteredEvents = e.filter(evt => (evt.tags||[]).some(t => filters.has(t)));
+    }
+
+    console.log(`[이벤트 로드] 총 ${e.length}개, 필터된 ${filteredEvents.length}개`);
 
     let c=document.getElementById("movie-calendar-content");
-    c.innerHTML="<div style='padding:20px; text-align:center; color:#ccc;'><p>✅ "+e.length+" 개의 이벤트가 로드되었습니다.</p><p style='font-size:12px; margin-top:10px;'>(캘린더 전체 렌더링은 다음 단계에서 구현)</p></div>";
+    c.innerHTML="";
+
+    // 정보 카드
+    let infoCard = document.createElement("div");
+    infoCard.className = "movie-info-card";
+    infoCard.innerHTML = `
+      <div class="movie-info-title">${y}년 ${MONTHS[m]} 영화</div>
+      <div class="movie-info-stats">
+        <div class="movie-stat">
+          <span class="movie-stat-val">${filteredEvents.length}</span>
+          <span class="movie-stat-lbl">개봉작</span>
+        </div>
+        <div class="movie-stat">
+          <span class="movie-stat-val">${countByTag(filteredEvents, 'premiere')}</span>
+          <span class="movie-stat-lbl">시사회</span>
+        </div>
+        <div class="movie-stat">
+          <span class="movie-stat-val">${countByTag(filteredEvents, 'release')}</span>
+          <span class="movie-stat-lbl">개봉일</span>
+        </div>
+      </div>
+    `;
+    c.appendChild(infoCard);
+
+    // 캘린더 래퍼
+    let calWrap = document.createElement("div");
+    calWrap.className = "movie-cal-wrap";
+
+    // 요일 헤더
+    let hdr = document.createElement("div");
+    hdr.className = "movie-cal-header";
+    ["월","화","수","목","금","토","일"].forEach((lbl, i) => {
+      let d = document.createElement("div");
+      d.className = "movie-cal-dow" + (i===5?" sat":i===6?" sun":"");
+      d.textContent = lbl;
+      hdr.appendChild(d);
+    });
+    calWrap.appendChild(hdr);
+
+    // 셀 행
+    let cellsRow = document.createElement("div");
+    cellsRow.className = "movie-cells-row";
+
+    let firstDay = new Date(y,m,1).getDay();
+    let startMonday = firstDay === 0 ? 6 : firstDay - 1;
+    let daysCount = daysInMonth(y,m);
+
+    // 이전 월 패딩
+    for(let i = 0; i < startMonday; i++) {
+      let cell = document.createElement("div");
+      cell.className = "movie-cell empty";
+      cellsRow.appendChild(cell);
+    }
+
+    // 현재 월 날짜
+    for(let day = 1; day <= daysCount; day++) {
+      let cell = document.createElement("div");
+      cell.className = "movie-cell";
+
+      let dayEvents = filteredEvents.filter(e => e.date === day);
+      let dateStr = String(day).padStart(2,"0");
+
+      let html = `<div class="movie-cell-date">${dateStr}</div>`;
+
+      if(dayEvents.length > 0) {
+        html += '<div class="movie-cell-events">';
+        dayEvents.forEach(evt => {
+          let tagsHtml = '';
+          (evt.tags||[]).forEach(tag => {
+            let tagInfo = TAGS.find(t => t.id === tag);
+            if(tagInfo) {
+              tagsHtml += `<span class="movie-tag" style="background-color:${tagInfo.color}20;color:${tagInfo.color}">${tagInfo.label}</span>`;
+            }
+          });
+
+          let eventInner = `<div class="movie-event-title">${evt.title}</div><div class="movie-event-tags">${tagsHtml}</div>`;
+
+          if(evt.href) {
+            html += `<a href="${evt.href}" target="_blank" rel="noopener noreferrer" class="movie-cell-event-link">${eventInner}</a>`;
+          } else {
+            html += `<div class="movie-cell-event">${eventInner}</div>`;
+          }
+        });
+        html += '</div>';
+      }
+
+      cell.innerHTML = html;
+      cellsRow.appendChild(cell);
+    }
+
+    calWrap.appendChild(cellsRow);
+    c.appendChild(calWrap);
+
+    // 범례
+    let legend = document.createElement("div");
+    legend.className = "movie-legend";
+    TAGS.forEach(tag => {
+      let item = document.createElement("div");
+      item.className = "movie-legend-item";
+      item.innerHTML = `
+        <span class="movie-legend-color" style="background-color:${tag.color}"></span>
+        <span class="movie-legend-label">${tag.label}</span>
+      `;
+      legend.appendChild(item);
+    });
+    c.appendChild(legend);
 
     console.log(`[렌더링 완료] DOM 업데이트됨`);
   } catch(error) {
