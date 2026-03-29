@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 배경 -->
+  <rect width="512" height="512" fill="#0a0b0d" rx="90"/>
+
+  <!-- 원형 배경 -->
+  <circle cx="256" cy="256" r="180" fill="#f59e0b"/>
+
+  <!-- 필름 테이프 -->
+  <g fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round">
+    <!-- 좌측 필름 홈 -->
+    <circle cx="130" cy="180" r="12" fill="#000000"/>
+    <circle cx="130" cy="240" r="12" fill="#000000"/>
+    <circle cx="130" cy="300" r="12" fill="#000000"/>
+    <circle cx="130" cy="360" r="12" fill="#000000"/>
+
+    <!-- 우측 필름 홈 -->
+    <circle cx="382" cy="180" r="12" fill="#000000"/>
+    <circle cx="382" cy="240" r="12" fill="#000000"/>
+    <circle cx="382" cy="300" r="12" fill="#000000"/>
+    <circle cx="382" cy="360" r="12" fill="#000000"/>
+  </g>
+
+  <!-- 필름 프레임들 -->
+  <g fill="none" stroke="#000000" stroke-width="14" stroke-linejoin="round">
+    <!-- 첫 번째 프레임 -->
+    <rect x="160" y="160" width="80" height="80" rx="4"/>
+    <!-- 두 번째 프레임 -->
+    <rect x="256" y="160" width="80" height="80" rx="4"/>
+    <!-- 세 번째 프레임 -->
+    <rect x="352" y="160" width="80" height="80" rx="4"/>
+  </g>
+
+  <!-- 재생 버튼 (삼각형) -->
+  <g fill="#000000">
+    <!-- 첫 번째 프레임 -->
+    <polygon points="185,185 185,235 215,210"/>
+    <!-- 두 번째 프레임 -->
+    <polygon points="281,185 281,235 311,210"/>
+    <!-- 세 번째 프레임 -->
+    <polygon points="377,185 377,235 407,210"/>
+  </g>
+
+  <!-- 아래 필름 프레임들 -->
+  <g fill="none" stroke="#000000" stroke-width="14" stroke-linejoin="round">
+    <rect x="160" y="280" width="80" height="80" rx="4"/>
+    <rect x="256" y="280" width="80" height="80" rx="4"/>
+    <rect x="352" y="280" width="80" height="80" rx="4"/>
+  </g>
+
+  <!-- 아래 재생 버튼 -->
+  <g fill="#000000">
+    <polygon points="185,305 185,355 215,330"/>
+    <polygon points="281,305 281,355 311,330"/>
+    <polygon points="377,305 377,355 407,330"/>
+  </g>
+</svg>
