@@ -345,3 +345,5 @@ function _countByTag(events, tagId) {
 // 전역 노출
 window.changeMovieMonth = changeMovieMonth;
 window.startMovieCrawl = startMovieCrawl;
+window.renderMovie = renderMovie;
+window.toggleMovieTagFilter = toggleMovieTagFilter;
