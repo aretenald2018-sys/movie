@@ -2,198 +2,46 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="description" content="무코 영화 캘린더 - 영화 이벤트 필터링">
-<meta name="theme-color" content="#1a1a1a">
-<title>🎬 영화 캘린더</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>영화 캘린더</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<div class="loading-overlay" id="loading">
-  <div class="spinner"></div>
-  <div style="font-size:13px;color:var(--muted)">데이터 불러오는 중...</div>
+<div class="loading-overlay" id="loading"><div class="spinner"></div></div>
+<div id="tab-movie" class="tab-panel" style="display:block">
+<div class="movie-tab-header">
+<button onclick="changeMovieMonth(-1)">◀</button>
+<span id="movie-label">2026년 3월</span>
+<button onclick="changeMovieMonth(1)">▶</button>
 </div>
-
-<div id="tab-movie" class="tab-panel active" style="display: block;">
-  <div class="movie-tab-header">
-    <button class="month-nav-btn" onclick="changeMovieMonth(-1)">◀</button>
-    <span class="movie-tab-title" id="movie-label">2026년 3월</span>
-    <button class="month-nav-btn" onclick="changeMovieMonth(1)">▶</button>
-    <button class="movie-refresh-btn" id="movie-refresh-btn">🔄 새로고침</button>
-  </div>
-  <div id="movie-tag-filters" class="movie-tag-filters"></div>
-  <div id="movie-calendar-content" class="movie-calendar-content"></div>
+<div id="movie-tag-filters"></div>
+<div id="movie-calendar-content"></div>
 </div>
-
 <script>
-const MONTHS = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
-const MOVIE_TAGS = [
-  { id: 'premiere', label: '시사회', color: '#a78bfa' },
-  { id: 'gv', label: 'GV', color: '#f472b6' },
-  { id: 'screening', label: '상영회', color: '#06b6d4' },
-  { id: 'release', label: '개봉일', color: '#fb923c' },
-  { id: 'rerelease', label: '재개봉', color: '#3b82f6' },
-  { id: 'vip', label: '우대인사', color: '#10b981' },
-  { id: 'festival', label: '영화제', color: '#f59e0b' },
-];
-
-let currentYear = 2026;
-let currentMonth = 2;
-let activeTagFilters = new Set();
-let movieData = {};
-
-async function initMovie() {
-  try {
-    const response = await fetch('./data/movies/2026-03.json');
-    movieData['2026-03'] = await response.json();
-    
-    const response2 = await fetch('./data/movies/2026-04.json');
-    movieData['2026-04'] = await response2.json();
-    
-    renderMovie(); document.getElementById("loading").style.display = "none";;
-  } catch (e) {
-    console.error('데이터 로드 실패:', e);
-    renderMovie(); document.getElementById("loading").style.display = "none";;
+const MONTHS=["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
+const TAGS=[{id:"premiere",label:"시사회",color:"#a78bfa"},{id:"gv",label:"GV",color:"#f472b6"}];
+let y=2026,m=2,filters=new Set(),cache={};
+async function getData(y,m){
+  let k=y+"-"+String(m+1).padStart(2,"0");
+  if(cache[k])return cache[k];
+  try{
+    let r=await fetch("./data/movies/"+k+".json");
+    cache[k]=await r.json();
+    return cache[k];
+  }catch(e){
+    return {events:[]};
   }
 }
-
-function changeMovieMonth(delta) {
-  currentMonth += delta;
-  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-  renderMovie(); document.getElementById("loading").style.display = "none";;
+async function changeMovieMonth(d){m+=d;if(m<0){m=11;y--}if(m>11){m=0;y++}await render()}
+async function render(){
+  document.getElementById("movie-label").textContent=y+"년 "+MONTHS[m];
+  let d=await getData(y,m);
+  let e=d.events||[];
+  let c=document.getElementById("movie-calendar-content");
+  c.innerHTML="<p>"+e.length+" 이벤트 로드됨</p>";
+  document.getElementById("loading").style.display="none";
 }
-
-function renderMovie(); document.getElementById("loading").style.display = "none"; {
-  document.getElementById('movie-label').textContent = `${currentYear}년 ${MONTHS[currentMonth]}`;
-  renderMovieTagFilters();
-  renderMovieCalendar();
-  document.getElementById('loading').style.display = 'none';
-}
-
-function renderMovieTagFilters() {
-  const el = document.getElementById('movie-tag-filters');
-  el.innerHTML = '';
-  const container = document.createElement('div');
-  container.className = 'movie-tag-filter-row';
-  
-  MOVIE_TAGS.forEach(tag => {
-    const btn = document.createElement('button');
-    btn.className = 'movie-tag-filter-btn';
-    btn.style.borderColor = tag.color;
-    btn.textContent = tag.label;
-    if (activeTagFilters.has(tag.id)) btn.classList.add('active');
-    btn.onclick = () => toggleMovieTagFilter(tag.id, btn);
-    container.appendChild(btn);
-  });
-  
-  el.appendChild(container);
-}
-
-function toggleMovieTagFilter(tagId, btn) {
-  if (activeTagFilters.has(tagId)) {
-    activeTagFilters.delete(tagId);
-    btn.classList.remove('active');
-  } else {
-    activeTagFilters.add(tagId);
-    btn.classList.add('active');
-  }
-  renderMovieCalendar();
-}
-
-function renderMovieCalendar() {
-  const key = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
-  const data = movieData[key] || { events: [] };
-  let events = data.events || [];
-  
-  if (activeTagFilters.size > 0) {
-    events = events.filter(e => (e.tags || []).some(t => activeTagFilters.has(t)));
-  }
-  
-  const el = document.getElementById('movie-calendar-content');
-  el.innerHTML = '';
-  
-  // 정보 카드
-  const infoCard = document.createElement('div');
-  infoCard.className = 'movie-info-card';
-  infoCard.innerHTML = `
-    <div class="movie-info-title">${currentYear}년 ${MONTHS[currentMonth]} 영화</div>
-    <div class="movie-info-stats">
-      <div class="movie-stat">
-        <span class="movie-stat-val">${events.length}</span>
-        <span class="movie-stat-lbl">개봉작</span>
-      </div>
-    </div>
-  `;
-  el.appendChild(infoCard);
-  
-  // 캘린더
-  const calWrap = document.createElement('div');
-  calWrap.className = 'movie-cal-wrap';
-  
-  const hdr = document.createElement('div');
-  hdr.className = 'movie-cal-header';
-  ['월','화','수','목','금','토','일'].forEach((lbl, i) => {
-    const d = document.createElement('div');
-    d.className = 'movie-cal-dow' + (i===5?' sat':i===6?' sun':'');
-    d.textContent = lbl;
-    hdr.appendChild(d);
-  });
-  calWrap.appendChild(hdr);
-  
-  const cellsRow = document.createElement('div');
-  cellsRow.className = 'movie-cells-row';
-  
-  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-  const startMonday = firstDay === 0 ? 6 : firstDay - 1;
-  const daysCount = new Date(currentYear, currentMonth + 1, 0).getDate();
-  
-  for (let i = 0; i < startMonday; i++) {
-    const cell = document.createElement('div');
-    cell.className = 'movie-cell empty';
-    cellsRow.appendChild(cell);
-  }
-  
-  for (let day = 1; day <= daysCount; day++) {
-    const cell = document.createElement('div');
-    cell.className = 'movie-cell';
-    
-    const dayEvents = events.filter(e => e.date === day);
-    let html = `<div class="movie-cell-date">${String(day).padStart(2, '0')}</div>`;
-    
-    if (dayEvents.length > 0) {
-      html += '<div class="movie-cell-events">';
-      dayEvents.forEach(evt => {
-        let tagsHtml = '';
-        (evt.tags || []).forEach(tag => {
-          const tagInfo = MOVIE_TAGS.find(t => t.id === tag);
-          if (tagInfo) {
-            tagsHtml += `<span class="movie-tag" style="background-color:${tagInfo.color}20;color:${tagInfo.color}">${tagInfo.label}</span>`;
-          }
-        });
-        const eventInner = `<div class="movie-event-title">${evt.title}</div><div class="movie-event-tags">${tagsHtml}</div>`;
-        if (evt.href) {
-          html += `<a href="${evt.href}" target="_blank" rel="noopener noreferrer" class="movie-cell-event-link">${eventInner}</a>`;
-        } else {
-          html += `<div class="movie-cell-event">${eventInner}</div>`;
-        }
-      });
-      html += '</div>';
-    }
-    
-    cell.innerHTML = html;
-    cellsRow.appendChild(cell);
-  }
-  
-  calWrap.appendChild(cellsRow);
-  el.appendChild(calWrap);
-}
-
-// 초기화
-initMovie();
+render();
 </script>
-
 </body>
 </html>
