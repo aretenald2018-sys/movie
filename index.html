@@ -71,6 +71,16 @@ async function getData(y,m){
 function countByTag(events, tagId) {
   return events.filter(e => (e.tags || []).includes(tagId)).length;
 }
+function toggleMovieTagFilter(tagId, btn) {
+  if(filters.has(tagId)) {
+    filters.delete(tagId);
+    btn.classList.remove("active");
+  } else {
+    filters.add(tagId);
+    btn.classList.add("active");
+  }
+  render();
+}
 
 async function changeMovieMonth(d){
   console.log(`[월 변경] ${d > 0 ? '다음' : '이전'} 달로 이동`);
