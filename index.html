@@ -52,10 +52,10 @@ async function initMovie() {
     const response2 = await fetch('./data/movies/2026-04.json');
     movieData['2026-04'] = await response2.json();
     
-    renderMovie();
+    renderMovie(); document.getElementById("loading").style.display = "none";;
   } catch (e) {
     console.error('데이터 로드 실패:', e);
-    renderMovie();
+    renderMovie(); document.getElementById("loading").style.display = "none";;
   }
 }
 
@@ -63,10 +63,10 @@ function changeMovieMonth(delta) {
   currentMonth += delta;
   if (currentMonth < 0) { currentMonth = 11; currentYear--; }
   if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-  renderMovie();
+  renderMovie(); document.getElementById("loading").style.display = "none";;
 }
 
-function renderMovie() {
+function renderMovie(); document.getElementById("loading").style.display = "none"; {
   document.getElementById('movie-label').textContent = `${currentYear}년 ${MONTHS[currentMonth]}`;
   renderMovieTagFilters();
   renderMovieCalendar();
