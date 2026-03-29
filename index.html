@@ -222,7 +222,6 @@ if ('serviceWorker' in navigator) {
 let installPromptEvent = null;
 
 window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
   installPromptEvent = e;
   console.log('[PWA] 설치 프롬프트 이벤트 감지됨');
 });
