@@ -3,45 +3,110 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>영화 캘린더</title>
+<meta name="description" content="무코 영화 캘린더">
+<meta name="theme-color" content="#1a1a1a">
+<title>🎬 영화 캘린더</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="loading-overlay" id="loading"><div class="spinner"></div></div>
-<div id="tab-movie" class="tab-panel" style="display:block">
-<div class="movie-tab-header">
-<button onclick="changeMovieMonth(-1)">◀</button>
-<span id="movie-label">2026년 3월</span>
-<button onclick="changeMovieMonth(1)">▶</button>
+
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div style="font-size:13px;color:#999">데이터 불러오는 중...</div>
 </div>
-<div id="movie-tag-filters"></div>
-<div id="movie-calendar-content"></div>
+
+<div id="tab-movie" class="tab-panel active" style="display:block">
+  <div class="movie-tab-header">
+    <button class="month-nav-btn" onclick="changeMovieMonth(-1)">◀</button>
+    <span class="movie-tab-title" id="movie-label">2026년 3월</span>
+    <button class="month-nav-btn" onclick="changeMovieMonth(1)">▶</button>
+  </div>
+  <div id="movie-tag-filters"></div>
+  <div id="movie-calendar-content"></div>
 </div>
+
 <script>
+console.log('[초기화] 영화 캘린더 스크립트 로드됨');
+
 const MONTHS=["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
-const TAGS=[{id:"premiere",label:"시사회",color:"#a78bfa"},{id:"gv",label:"GV",color:"#f472b6"}];
-let y=2026,m=2,filters=new Set(),cache={};
+const TAGS=[
+  {id:"premiere",label:"시사회",color:"#a78bfa"},
+  {id:"gv",label:"GV",color:"#f472b6"},
+  {id:"screening",label:"상영회",color:"#06b6d4"},
+  {id:"release",label:"개봉일",color:"#fb923c"},
+  {id:"rerelease",label:"재개봉",color:"#3b82f6"},
+  {id:"vip",label:"우대인사",color:"#10b981"},
+  {id:"festival",label:"영화제",color:"#f59e0b"}
+];
+
+let y=2026, m=2, filters=new Set(), cache={};
+
 async function getData(y,m){
   let k=y+"-"+String(m+1).padStart(2,"0");
-  if(cache[k])return cache[k];
+  if(cache[k]) {
+    console.log(`[캐시 히트] ${k} 데이터를 캐시에서 반환합니다.`);
+    return cache[k];
+  }
+
   try{
-    let r=await fetch("./data/movies/"+k+".json");
+    console.log(`[데이터 요청] ${k}.json 파일 로드를 시도합니다.`);
+    let r=await fetch(`data/movies/${k}.json`);
+
+    if(!r.ok) throw new Error(`HTTP Error: ${r.status}`);
+
     cache[k]=await r.json();
+    console.log(`[데이터 성공] ${k} 데이터를 불러왔습니다.`, cache[k]);
     return cache[k];
   }catch(e){
+    console.error(`[데이터 실패] ${k} 데이터를 불러오지 못했습니다:`, e);
     return {events:[]};
   }
 }
-async function changeMovieMonth(d){m+=d;if(m<0){m=11;y--}if(m>11){m=0;y++}await render()}
-async function render(){
-  document.getElementById("movie-label").textContent=y+"년 "+MONTHS[m];
-  let d=await getData(y,m);
-  let e=d.events||[];
-  let c=document.getElementById("movie-calendar-content");
-  c.innerHTML="<p>"+e.length+" 이벤트 로드됨</p>";
-  document.getElementById("loading").style.display="none";
+
+async function changeMovieMonth(d){
+  console.log(`[월 변경] ${d > 0 ? '다음' : '이전'} 달로 이동`);
+  m+=d;
+  if(m<0){m=11;y--}
+  if(m>11){m=0;y++}
+
+  document.getElementById("loading").style.display="flex";
+  await render();
 }
-render();
+
+async function render(){
+  console.log(`[렌더링 시작] ${y}년 ${MONTHS[m]}`);
+
+  try {
+    document.getElementById("movie-label").textContent=y+"년 "+MONTHS[m];
+    let d=await getData(y,m);
+    let e=d.events||[];
+
+    console.log(`[이벤트 로드] 총 ${e.length}개 이벤트`);
+
+    let c=document.getElementById("movie-calendar-content");
+    c.innerHTML="<div style='padding:20px; text-align:center; color:#ccc;'><p>✅ "+e.length+" 개의 이벤트가 로드되었습니다.</p><p style='font-size:12px; margin-top:10px;'>(캘린더 전체 렌더링은 다음 단계에서 구현)</p></div>";
+
+    console.log(`[렌더링 완료] DOM 업데이트됨`);
+  } catch(error) {
+    console.error("[렌더링 에러]", error);
+    document.getElementById("movie-calendar-content").innerHTML="<div style='padding:20px; text-align:center; color:#f44;'>❌ 오류 발생: "+error.message+"</div>";
+  } finally {
+    document.getElementById("loading").style.display="none";
+    console.log("[로딩 오버레이 숨김 완료]");
+  }
+}
+
+console.log('[초기화] render() 함수 실행');
+render().then(() => {
+  console.log('[초기화 완료] 영화 캘린더 초기 렌더링 완료');
+}).catch(err => {
+  console.error('[초기화 실패]', err);
+});
+
+window.changeMovieMonth = changeMovieMonth;
+window.render = render;
 </script>
+
 </body>
 </html>
